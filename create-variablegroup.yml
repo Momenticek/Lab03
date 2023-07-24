@@ -14,7 +14,7 @@ steps:
   #condition: eq(variables['deploy.AssignAzureMSPolicies'], true)
   inputs:
     #azureSubscription: '$(admin.azureConnection)'
-    azureSubscription: 'TietoEVRY Azure DevOps II - Lighthouse'
+    azureSubscription: 'Azure DevOps II - Light'
     ScriptType: 'FilePath'
     ScriptPath: '$(Build.SourcesDirectory)\Scripts\Deploy-VariableGroups.ps1'
     ScriptArguments: '' #'-Location $(settings.Location)'
