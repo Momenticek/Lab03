@@ -1,0 +1,96 @@
+
+parameters:
+- name: Enviroment
+  displayName: "Choose Enviroment:"
+  type: string
+  default: Test
+  values:
+    - Test
+    - SharedServices
+    - Production
+    - NonProduction
+    - Demo
+    - ProductionHafslund
+
+- name: LogAnalyticsWorkspace
+  displayName: "Create Log Analytics Workspace"
+  type: boolean
+  default: false
+- name: AutomationAccount
+  displayName: "Create Automation Account"
+  type: boolean
+  default: false
+- name: MonitoringConfiguration
+  displayName: "Apply Monitoring configuration (alerts, action groups)"
+  type: boolean
+  default: false
+- name: AssignMonitoringPolicy
+  displayName: "Assign Monitoring policy"
+  type: boolean
+  default: true
+- name: UpdateManagement
+  displayName: "Configure OS Update Management"
+  type: boolean
+  default: true
+- name: CreateUpdMgmtPolicy
+  displayName: "Install Update Management policy definition"
+  type: boolean
+  default: true
+- name: AssignUpdMgmtPolicy
+  displayName: "Assign Update Management policy"
+  type: boolean
+  default: true
+- name: Backup
+  displayName: "Deploy Backup infrastructure"
+  type: boolean
+  default: true
+- name: CreateBackupPolicy
+  displayName: "Install Backup policy definition"
+  type: boolean
+  default: true
+- name: AssignBackupPolicy
+  displayName: "Assign Backup policy"
+  type: boolean
+  default: false
+- name: AssignAzureMSPolicies
+  displayName: "Assign Managed Azure Service Policies"
+  type: boolean
+  default: true
+
+trigger: none
+#- master
+
+variables:
+  - group: ${{ parameters.Enviroment }}ManagedServices
+ #- group: ${{ parameters.Enviroment }}ManagedServicesSecret
+  - name: deploy.LogAnalyticsWorkspace
+    value: ${{ parameters.LogAnalyticsWorkspace }}
+  - name: deploy.AutomationAccount
+    value: ${{ parameters.AutomationAccount }}
+  - name: deploy.MonitoringConfiguration
+    value: ${{ parameters.MonitoringConfiguration }}
+  - name: deploy.UpdateManagement
+    value: ${{ parameters.UpdateManagement }}
+  - name: deploy.CreateUpdMgmtPolicy
+    value: ${{ parameters.CreateUpdMgmtPolicy }}
+  - name: deploy.AssignUpdMgmtPolicy
+    value: ${{ parameters.AssignUpdMgmtPolicy }}
+  - name: deploy.Backup
+    value: ${{ parameters.Backup }}
+  - name: deploy.CreateBackupPolicy
+    value: ${{ parameters.CreateBackupPolicy }}
+  - name: deploy.AssignBackupPolicy
+    value: ${{ parameters.AssignBackupPolicy }}
+  - name: deploy.AssignMonitoringPolicy
+    value: ${{ parameters.AssignMonitoringPolicy }}
+  - name: deploy.AssignAzureMSPolicies
+    value: ${{ parameters.AssignAzureMSPolicies }}
+
+pool:
+  name: Hosted Windows 2019 with VS2019
+
+steps:
+- template: ms-monitoring.yml
+- template: ms-backup.yml
+- template: ms-azure-policy.yml
+- template: ms-update-mgmt.yml

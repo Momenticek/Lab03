@@ -1,0 +1,10 @@
+steps:
+- task: AzurePowerShell@5
+  displayName: 'Assign Managed Service policies'
+  condition: eq(variables['deploy.AssignAzureMSPolicies'], true)
+  inputs:
+    azureSubscription: '$(admin.azureConnection)'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Policy\Assign-MS-Policies.ps1'
+    ScriptArguments: '-Location $(settings.Location)'
+    azurePowerShellVersion: 'LatestVersion'

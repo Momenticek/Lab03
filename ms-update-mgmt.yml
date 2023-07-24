@@ -1,0 +1,27 @@
+steps:
+- task: AzurePowerShell@5
+  displayName: 'Enable Update Management'
+  condition: eq(variables['deploy.UpdateManagement'], true)
+  inputs:
+    azureSubscription: '$(admin.azureConnection)'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Update Management\New-UpdateSchedule.ps1'
+    ScriptArguments: '-SubscriptionId $(admin.subscriptionId) -MonitoringResourceGroup $(monitoring.resourceGroup) -AutomationAccountName $(monitoring.automationAccountName) -TimeZone "$(updmgmt.scheduleTimeZone)" -GroupTagName "$(updmgmt.groupTagName)"'
+    azurePowerShellVersion: 'LatestVersion'
+- task: AzurePowerShell@5
+  displayName: 'Create Update Management policy definition'
+  condition: eq(variables['deploy.CreateUpdMgmtPolicy'], true)
+  inputs:
+    azureSubscription: '$(admin.azureConnection)'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Update Management\Deploy-UpdMgmtPolicy.ps1'
+    azurePowerShellVersion: 'LatestVersion'
+- task: AzurePowerShell@5
+  displayName: 'Assign Update Management policy'
+  condition: eq(variables['deploy.AssignUpdMgmtPolicy'], true)
+  inputs:
+    azureSubscription: '$(admin.azureConnection)'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Update Management\Assign-UpdMgmtPolicy.ps1'
+    ScriptArguments: '-TagName $(updmgmt.groupTagName) -TagValue $(updmgmt.defaultGroupTagValue) -Location $(settings.location)'
+    azurePowerShellVersion: 'LatestVersion'

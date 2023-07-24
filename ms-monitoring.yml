@@ -1,0 +1,52 @@
+steps:
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy Log Analytics workspace'
+  condition: eq(variables['deploy.LogAnalyticsWorkspace'], true)
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: '$(admin.azureConnection)'
+    subscriptionId: '$(admin.subscriptionId)'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: '$(monitoring.resourceGroup)'
+    location: '$(settings.Location)'
+    templateLocation: 'Linked artifact'
+    csmFile: 'Templates\Monitoring\monitoring-workspace.json'
+    overrideParameters: '-workspaceName $(monitoring.workspaceName) -workspaceRegion $(settings.location)'
+    deploymentMode: 'Incremental'
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy Automation account'
+  condition: eq(variables['deploy.AutomationAccount'], true)
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: '$(admin.azureConnection)'
+    subscriptionId: '$(admin.subscriptionId)'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: '$(monitoring.resourceGroup)'
+    location: '$(settings.Location)'
+    templateLocation: 'Linked artifact'
+    csmFile: 'Templates\Monitoring\monitoring-automation.json'
+    overrideParameters: '-automationAccountName $(monitoring.automationAccountName) -automationRegion $(settings.location) -workspaceName $(monitoring.workspaceName)'
+    deploymentMode: 'Incremental'
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy monitoring configuration'
+  condition: eq(variables['deploy.MonitoringConfiguration'], true)
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: '$(admin.azureConnection)'
+    subscriptionId: '$(admin.subscriptionId)'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: '$(monitoring.resourceGroup)'
+    location: '$(settings.Location)'
+    templateLocation: 'Linked artifact'
+    csmFile: 'Templates\Monitoring\monitoring-logalerts.json'
+    overrideParameters: '-workspaceName $(monitoring.workspaceName) -enabledSolutions $(monitoring.enabledSolutions)'
+    deploymentMode: 'Incremental'
+- task: AzurePowerShell@5
+  displayName: 'Assign monitoring policy'
+  condition: eq(variables['deploy.AssignMonitoringPolicy'], true)
+  inputs:
+    azureSubscription: '$(admin.azureConnection)'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Monitoring\Assign-MonitoringPolicy.ps1'
+    ScriptArguments: '-LogAnalyticsWorkspaceName $(monitoring.workspaceName) -Location $(settings.location)'
+    azurePowerShellVersion: 'LatestVersion'

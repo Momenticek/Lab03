@@ -1,0 +1,21 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pool:
+  name: Hosted Windows 2019 with VS2019
+
+steps:
+- task: AzurePowerShell@5
+  displayName: 'Create Variable Groups'
+  #condition: eq(variables['deploy.AssignAzureMSPolicies'], true)
+  inputs:
+    #azureSubscription: '$(admin.azureConnection)'
+    azureSubscription: 'TietoEVRY Azure DevOps II - Lighthouse'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Deploy-VariableGroups.ps1'
+    ScriptArguments: '' #'-Location $(settings.Location)'
+    azurePowerShellVersion: 'LatestVersion'

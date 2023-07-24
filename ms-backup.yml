@@ -1,0 +1,32 @@
+steps:
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy backup'
+  condition: eq(variables['deploy.Backup'], true)
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: '$(admin.azureConnection)'
+    subscriptionId: '$(admin.subscriptionId)'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: '$(backup.resourceGroup)'
+    location: '$(settings.Location)'
+    templateLocation: 'Linked artifact'
+    csmFile: 'Templates\Backup\backup.json'
+    overrideParameters: '-vaultName $(backup.vaultName) -policyName $(backup.policyName) -dailyRetentionDurationCount $(backup.retentionDays) -scheduleRunTimes $(backup.scheduleTime) -timeZone "$(backup.scheduleTimeZone)" -vaultStorageType $(backup.storageType)'
+    deploymentMode: 'Incremental'
+- task: AzurePowerShell@5
+  displayName: 'Create backup policy definition'
+  condition: eq(variables['deploy.CreateBackupPolicy'], true)
+  inputs:
+    azureSubscription: '$(admin.azureConnection)'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Backup\Deploy-BackupPolicy.ps1'
+    azurePowerShellVersion: 'LatestVersion'
+- task: AzurePowerShell@5
+  displayName: 'Assign backup policy'
+  condition: eq(variables['deploy.AssignBackupPolicy'], true)
+  inputs:
+    azureSubscription: '$(admin.azureConnection)'
+    ScriptType: 'FilePath'
+    ScriptPath: '$(Build.SourcesDirectory)\Scripts\Backup\Assign-BackupPolicy.ps1'
+    ScriptArguments: '-BackupVaultRGName $(backup.resourceGroup) -BackupVaultName $(backup.vaultName) -BackupPolicyName $(backup.policyName) -LogAnalyticsWorkspaceName $(monitoring.workspaceName) -Location $(settings.location)'
+    azurePowerShellVersion: 'LatestVersion'
